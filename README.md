@@ -9,11 +9,19 @@ Two scripts for assigning judges and content reviewers to CHEP 2026 paper submis
 ## Prerequisites
 
 - Python 3 with `requests` installed
-- `indico_token.json` in the working directory containing a write-capable Indico personal API token:
+- `indico_token.json` in the working directory with the following format:
   ```json
-  { "chep_write_token": "indp_..." }
+  {
+    "chep_read_token":  "indp_...",
+    "chep_write_token": "indp_..."
+  }
   ```
-- The token must be created at https://indico.cern.ch/user/tokens/ with the **"Everything (all methods)"** scope
+  Both tokens are created at https://indico.cern.ch/user/tokens/ with the **"Everything (all methods)"** scope. You can use a single token for both keys if preferred.
+
+  | Key | Used by |
+  |---|---|
+  | `chep_read_token` | `list_comments.py`, `build_user_cache.py` |
+  | `chep_write_token` | `assign_judge.py`, `assign_reviewer.py`, `add_comment.py` |
 
 ## Scripts
 
