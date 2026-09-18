@@ -102,9 +102,9 @@ python3 assign_reviewer.py <friendly_id> [<friendly_id> ...] --email <email> [<e
 
 ## User cache (`users.json`)
 
-The assignment scripts resolve email addresses to Indico user IDs using `users.json`. On each run they load the cache as a baseline and augment it with participants found in the live papers export. If an email address cannot be resolved from either source, the script exits with an error.
+The assignment scripts resolve email addresses to Indico user IDs using `users.json`. On each run they load the cache as a baseline, augment it with participants found in the live papers export, and save it back — so the cache grows automatically over time. If an email address cannot be resolved from either source, the script exits with an error.
 
-The cache is necessary because Indico's user search API is not accessible via personal API tokens. For a pre-built cache, ask David for guidance.
+`users.json` is optional: it will be created on the first successful run. A pre-built cache covering all abstract submitters gives broader coverage from the start; ask David for guidance on obtaining one.
 
 To build or update the cache from the live Indico data, run `build_user_cache.py`:
 
