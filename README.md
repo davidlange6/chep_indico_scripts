@@ -25,6 +25,55 @@ Two scripts for assigning judges and content reviewers to CHEP 2026 paper submis
 
 ## Scripts
 
+### `assign_judge.py`
+
+Assigns one or more judges to one or more paper submissions. Requires `users.json` (see [User cache](#user-cache-usersjson) below).
+
+```
+python3 assign_judge.py <friendly_id> [<friendly_id> ...] --email <email> [<email> ...]
+```
+
+**Examples:**
+
+```bash
+# Assign one judge to one paper
+python3 assign_judge.py 690 --email david.lange@cern.ch
+
+# Assign one judge to multiple papers
+python3 assign_judge.py 690 77 42 --email david.lange@cern.ch
+
+# Assign multiple judges to multiple papers (all combinations)
+python3 assign_judge.py 690 77 --email alice@cern.ch bob@cern.ch
+```
+
+### `assign_reviewer.py`
+
+Assigns one or more content reviewers to one or more paper submissions. Identical interface to `assign_judge.py`. Also requires `users.json`.
+
+```
+python3 assign_reviewer.py <friendly_id> [<friendly_id> ...] --email <email> [<email> ...]
+```
+
+### `judge_paper.py`
+
+Issues a judgment on one or more paper submissions. Works for event managers regardless of judge assignment.
+
+```
+python3 judge_paper.py <friendly_id> [<friendly_id> ...]
+                       --judgment {accept,reject,to_be_corrected}
+                       [--comment "Optional comment for the submitter"]
+```
+
+The paper must be in `submitted` state to accept a new judgment.
+
+**Examples:**
+
+```bash
+python3 judge_paper.py 690 --judgment accept
+python3 judge_paper.py 77 --judgment to_be_corrected --comment "Please revise per guidelines."
+python3 judge_paper.py 77 449 --judgment reject --comment "Does not meet proceedings requirements."
+```
+
 ### `list_comments.py`
 
 Lists all comments made in the last N days, with optional filters.
@@ -69,55 +118,6 @@ python3 add_comment.py 690 --comment "Please address reviewer feedback before re
 
 # Comment on multiple papers at once
 python3 add_comment.py 690 77 42 --comment "Reminder: deadline is October 1."
-```
-
-### `judge_paper.py`
-
-Issues a judgment on one or more paper submissions. Works for event managers regardless of judge assignment.
-
-```
-python3 judge_paper.py <friendly_id> [<friendly_id> ...]
-                       --judgment {accept,reject,to_be_corrected}
-                       [--comment "Optional comment for the submitter"]
-```
-
-The paper must be in `submitted` state to accept a new judgment.
-
-**Examples:**
-
-```bash
-python3 judge_paper.py 690 --judgment accept
-python3 judge_paper.py 77 --judgment to_be_corrected --comment "Please revise per guidelines."
-python3 judge_paper.py 77 449 --judgment reject --comment "Does not meet proceedings requirements."
-```
-
-### `assign_judge.py`
-
-Assigns one or more judges to one or more paper submissions. Requires `users.json` (see [User cache](#user-cache-usersjson) below).
-
-```
-python3 assign_judge.py <friendly_id> [<friendly_id> ...] --email <email> [<email> ...]
-```
-
-**Examples:**
-
-```bash
-# Assign one judge to one paper
-python3 assign_judge.py 690 --email david.lange@cern.ch
-
-# Assign one judge to multiple papers
-python3 assign_judge.py 690 77 42 --email david.lange@cern.ch
-
-# Assign multiple judges to multiple papers (all combinations)
-python3 assign_judge.py 690 77 --email alice@cern.ch bob@cern.ch
-```
-
-### `assign_reviewer.py`
-
-Assigns one or more content reviewers to one or more paper submissions. Identical interface to `assign_judge.py`. Also requires `users.json`.
-
-```
-python3 assign_reviewer.py <friendly_id> [<friendly_id> ...] --email <email> [<email> ...]
 ```
 
 ## User cache (`users.json`)
