@@ -16,12 +16,12 @@ Two scripts for assigning judges and content reviewers to CHEP 2026 paper submis
     "chep_write_token": "indp_..."
   }
   ```
-  Both tokens are created at https://indico.cern.ch/user/tokens/ with the **"Everything (all methods)"** scope. You can use a single token for both keys if preferred.
+  Tokens are created at https://indico.cern.ch/user/tokens/. You can use a single token with the write scope for both keys if preferred.
 
-  | Key | Used by |
-  |---|---|
-  | `chep_read_token` | `list_comments.py`, `build_user_cache.py` |
-  | `chep_write_token` | `assign_judge.py`, `assign_reviewer.py`, `add_comment.py` |
+  | Key | Used by | Required scope |
+  |---|---|---|
+  | `chep_read_token` | `list_comments.py`, `build_user_cache.py` | Everything (only GET) |
+  | `chep_write_token` | `assign_judge.py`, `assign_reviewer.py`, `add_comment.py` | Everything (all methods) |
 
 ## Scripts
 
