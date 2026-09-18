@@ -2,7 +2,7 @@ name: Refresh CHEP sheet
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # daily at 06:00 UTC
+    - cron: '0 */2 * * *'  # every 2 hours
   workflow_dispatch:        # allow manual runs from the Actions tab
 
 jobs:
