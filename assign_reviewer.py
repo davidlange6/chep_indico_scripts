@@ -111,7 +111,9 @@ def main():
     papers_str = ", ".join(f"#{fid}" for fid in args.ids)
     users_str  = ", ".join(args.email)
     print(f"Assigning content reviewer(s) [{users_str}] to paper(s) [{papers_str}]...")
-    assign("content_reviewer", contrib_ids, user_ids)
+    ok = assign("content_reviewer", contrib_ids, user_ids)
+    if len(ok) < len(contrib_ids) * len(user_ids):
+        sys.exit(1)
 
 
 if __name__ == "__main__":
