@@ -69,10 +69,15 @@ def main():
 
     papers_str = ", ".join(f"#{fid}" for fid, _ in contrib_ids)
     print(f"Posting comment [{args.visibility}] to paper(s) [{papers_str}]...")
+    failed = False
     for fid, contrib_id in contrib_ids:
         ok = post_comment(contrib_id, args.comment, args.visibility)
         status = "OK" if ok else "FAILED"
         print(f"  #{fid} (contrib {contrib_id}): {status}")
+        if not ok:
+            failed = True
+    if failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
