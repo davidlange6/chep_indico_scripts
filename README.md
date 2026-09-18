@@ -71,6 +71,26 @@ python3 add_comment.py 690 --comment "Please address reviewer feedback before re
 python3 add_comment.py 690 77 42 --comment "Reminder: deadline is October 1."
 ```
 
+### `judge_paper.py`
+
+Issues a judgment on one or more paper submissions. Works for event managers regardless of judge assignment.
+
+```
+python3 judge_paper.py <friendly_id> [<friendly_id> ...]
+                       --judgment {accept,reject,to_be_corrected}
+                       [--comment "Optional comment for the submitter"]
+```
+
+The paper must be in `submitted` state to accept a new judgment.
+
+**Examples:**
+
+```bash
+python3 judge_paper.py 690 --judgment accept
+python3 judge_paper.py 77 --judgment to_be_corrected --comment "Please revise per guidelines."
+python3 judge_paper.py 77 449 --judgment reject --comment "Does not meet proceedings requirements."
+```
+
 ### `assign_judge.py`
 
 Assigns one or more judges to one or more paper submissions. Requires `users.json` (see [User cache](#user-cache-usersjson) below).
