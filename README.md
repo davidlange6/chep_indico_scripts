@@ -1,5 +1,9 @@
 # CHEP 2026 Paper Assignment Scripts
 
+> **These scripts have moved to https://github.com/davidlange6/chep_indico_scripts**
+
+
+
 Two scripts for assigning judges and content reviewers to CHEP 2026 paper submissions via the Indico API.
 
 ## Prerequisites
@@ -113,15 +117,4 @@ The email → user ID mapping relies on the local cache and live paper participa
 - Friendly IDs are the small sequential numbers shown in the CHEP paper management UI (e.g. 690), not the large internal contribution IDs.
 - The scripts exit with an error if any supplied paper number or email address cannot be resolved.
 - Assigning the same person twice to the same paper is a no-op on the Indico side (returns success).
-- Both scripts target **CHEP 2026** (Indico event 1471803 on indico.cern.ch). Edit `EVENT_ID` at the top of each script to use with a different event.
-
-## Configuration
-
-Copy `config.json` to your working directory and edit as needed:
-
-```json
-{
-  "base_url": "https://indico.cern.ch",
-  "event_id": "1471803"
-}
-```
+- Both scripts read the event ID and base URL from `config.json`. Edit that file to use with a different event or Indico instance.
