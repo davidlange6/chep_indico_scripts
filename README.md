@@ -124,6 +124,8 @@ python3 add_comment.py 690 77 42 --comment "Reminder: deadline is October 1."
 
 The assignment scripts resolve email addresses to Indico user IDs using `users.json`. On each run they load the cache as a baseline, augment it with participants found in the live papers export, and save it back — so the cache grows automatically over time. If an email address cannot be resolved from either source, the script exits with an error.
 
+**Why this limitation exists:** The CERN Indico API does not provide a general-purpose endpoint to look up a user ID from an email address. The only user IDs available via the API are those of people who have already interacted with papers in this event (as submitters, judges, reviewers, or commenters). This means a judge or reviewer cannot be assigned until they have at least one such interaction, or their ID is already in the local cache.
+
 `users.json` is optional: it will be created on the first successful run. A pre-built cache covering all abstract submitters gives broader coverage from the start; ask David for guidance on obtaining one.
 
 To build or update the cache from the live Indico data, run `build_user_cache.py`:
