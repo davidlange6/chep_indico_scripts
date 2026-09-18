@@ -39,10 +39,10 @@ def load_contrib_map():
 
 
 def post_comment(contrib_id, comment_text, visibility):
-    url = f"{BASE}/event/{EVENT_ID}/papers/{contrib_id}/comment"
+    url = f"{BASE}/event/{EVENT_ID}/papers/api/{contrib_id}/comment"
     r = requests.post(url, headers=HEADERS,
                       data={"comment": comment_text, "visibility": visibility})
-    return r.status_code == 200
+    return r.status_code in (200, 204)
 
 
 def main():
