@@ -73,7 +73,7 @@ python3 add_comment.py 690 77 42 --comment "Reminder: deadline is October 1."
 
 ### `assign_judge.py`
 
-Assigns one or more judges to one or more paper submissions.
+Assigns one or more judges to one or more paper submissions. Requires `users.json` (see [User cache](#user-cache-usersjson) below).
 
 ```
 python3 assign_judge.py <friendly_id> [<friendly_id> ...] --email <email> [<email> ...]
@@ -94,7 +94,7 @@ python3 assign_judge.py 690 77 --email alice@cern.ch bob@cern.ch
 
 ### `assign_reviewer.py`
 
-Assigns one or more content reviewers to one or more paper submissions. Identical interface to `assign_judge.py`.
+Assigns one or more content reviewers to one or more paper submissions. Identical interface to `assign_judge.py`. Also requires `users.json`.
 
 ```
 python3 assign_reviewer.py <friendly_id> [<friendly_id> ...] --email <email> [<email> ...]
