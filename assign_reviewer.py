@@ -29,15 +29,16 @@ def load_maps():
     ).json()
 
     friendly_to_contrib = {}
-    email_to_user = {}
+    cache = {}
 
     # Seed from local cache if present
     try:
         with open("users.json") as f:
-            for email, info in json.load(f).items():
-                email_to_user[email] = info["id"]
+            cache = json.load(f)
     except FileNotFoundError:
         pass
+
+    email_to_user = {e: info["id"] for e, info in cache.items()}
 
     for paper in data["papers"]:
         c = paper["contribution"]
@@ -49,9 +50,16 @@ def load_maps():
                 + [c2["user"] for c2 in rev.get("comments", [])]
             ):
                 if u and u.get("email"):
-                    email_to_user[u["email"].lower()] = u["id"]
+                    email = u["email"].lower()
+                    email_to_user[email] = u["id"]
+                    cache[email] = {"id": u["id"], "full_name": u.get("full_name", "")}
 
-    return friendly_to_contrib, email_to_user
+    return friendly_to_contrib, email_to_user, cache
+
+
+def save_cache(cache):
+    with open("users.json", "w") as f:
+        json.dump(cache, f, indent=2, sort_keys=True)
 
 
 def assign(role, contrib_ids, user_ids):
@@ -76,7 +84,7 @@ def main():
     args = parser.parse_args()
 
     print("Loading paper and user data from Indico...")
-    friendly_to_contrib, email_to_user = load_maps()
+    friendly_to_contrib, email_to_user, cache = load_maps()
 
     contrib_ids = []
     for fid in args.ids:
@@ -85,17 +93,21 @@ def main():
             sys.exit(1)
         contrib_ids.append(friendly_to_contrib[fid])
 
+    # Resolve emails, saving refreshed cache before failing if any are missing
     user_ids = []
-    for email in args.email:
-        uid = email_to_user.get(email.lower())
-        if uid is None:
-            print(f"ERROR: no user found for {email}. The user must already be "
-                  f"participating in the event as a judge, reviewer, submitter, "
+    missing = [e for e in args.email if email_to_user.get(e.lower()) is None]
+    if missing:
+        save_cache(cache)
+        for email in missing:
+            print(f"ERROR: no user found for {email} (cache refreshed). The user must "
+                  f"already be participating in the event as a judge, reviewer, submitter, "
                   f"or commenter before they can be assigned via this script.",
                   file=sys.stderr)
-            sys.exit(1)
-        user_ids.append(uid)
+        sys.exit(1)
+    for email in args.email:
+        user_ids.append(email_to_user[email.lower()])
 
+    save_cache(cache)
     papers_str = ", ".join(f"#{fid}" for fid in args.ids)
     users_str  = ", ".join(args.email)
     print(f"Assigning content reviewer(s) [{users_str}] to paper(s) [{papers_str}]...")
