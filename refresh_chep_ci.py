@@ -10,6 +10,41 @@ import re
 import requests
 from datetime import datetime, timezone
 
+
+def fetch_html_assignments(base, event_id, headers):
+    """Return {friendly_id: {"judge": str, "reviewers": [str]}} from the assignment-list HTML."""
+    r = requests.get(f"{base}/event/{event_id}/manage/papers/assignment-list/", headers=headers)
+    r.raise_for_status()
+    html = r.text
+    assignments = {}
+    for row_m in re.finditer(
+        r'<tr\s+id="contrib-\d+"[^>]*data-friendly-id="(\d+)"[^>]*>(.*?)</tr>',
+        html, re.S,
+    ):
+        fid = int(row_m.group(1))
+        row_html = row_m.group(2)
+        cells = re.findall(
+            r'<td[^>]+class="[^"]*person-row-cell[^"]*"[^>]*>(.*?)</td>',
+            row_html, re.S,
+        )
+        if len(cells) >= 2:
+            def _names(cell):
+                seen = set()
+                out = []
+                for n in re.findall(r'class="[^"]*person-row[^"]*"[^>]*>(.*?)</div>', cell, re.S):
+                    name = n.strip()
+                    if name and name not in seen:
+                        seen.add(name)
+                        out.append(name)
+                return out
+            judge_names = _names(cells[0])
+            reviewer_names = _names(cells[1])
+            assignments[fid] = {
+                "judge": "; ".join(judge_names),
+                "reviewers": reviewer_names,
+            }
+    return assignments
+
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
@@ -80,9 +115,13 @@ data = requests.get(
 papers = sorted(data["papers"], key=lambda p: p["contribution"]["friendly_id"])
 print(f"  {len(papers)} papers")
 
+print("Fetching assignment-list HTML for judge/reviewer assignments...")
+html_assignments = fetch_html_assignments(BASE, EVENT_ID, HEADERS)
+print(f"  {len(html_assignments)} assignment entries")
+
 # --- Build rows ---
 HEADER = ["#", "Title", "Track", "Revision", "Last Submitted", "State",
-          "Missing Rights Form?", "Last Comment", "Judge(s)", "Reviewer(s)"]
+          "Missing Rights Form?", "Last Comment", "# Reviews", "Judge(s)", "Reviewer(s)"]
 
 IGNORED_IDS = {671, 690}
 
@@ -105,8 +144,10 @@ for paper in papers:
         last_rev["state"],
         likely_missing_rights(last_rev["files"]),
         last_comment_dt(paper["revisions"]),
-        last_rev["judge"]["full_name"] if last_rev["judge"] else "",
-        "; ".join(r["user"]["full_name"] for r in last_rev["reviews"]),
+        len(last_rev["reviews"]),
+        (last_rev["judge"]["full_name"] if last_rev["judge"]
+         else html_assignments.get(contrib["friendly_id"], {}).get("judge", "")),
+        "; ".join(html_assignments.get(contrib["friendly_id"], {}).get("reviewers", [])),
     ])
 
 all_rows = [HEADER] + rows
@@ -154,7 +195,7 @@ sheets.spreadsheets().values().update(
 run_ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 sheets.spreadsheets().values().update(
     spreadsheetId=SHEET_ID,
-    range="Sheet1!K1",
+    range="Sheet1!L1",
     valueInputOption="USER_ENTERED",
     body={"values": [[f"Last refreshed: {run_ts}"]]},
 ).execute()
@@ -189,8 +230,9 @@ requests_batch.append({"addTable": {"table": {
         {"columnIndex": 5, "columnName": "State"},
         {"columnIndex": 6, "columnName": "Missing Rights Form?"},
         {"columnIndex": 7, "columnName": "Last Comment"},
-        {"columnIndex": 8, "columnName": "Judge(s)"},
-        {"columnIndex": 9, "columnName": "Reviewer(s)"},
+        {"columnIndex": 8, "columnName": "# Reviews",  "columnType": "DOUBLE"},
+        {"columnIndex": 9, "columnName": "Judge(s)"},
+        {"columnIndex": 10, "columnName": "Reviewer(s)"},
     ],
 }}})
 
@@ -235,10 +277,10 @@ for col_i, px in FIXED_COL_WIDTHS.items():
         "fields": "pixelSize",
     }})
 
-# Set column K width to fit the timestamp
+# Set column L width to fit the timestamp
 requests_batch.append({"updateDimensionProperties": {
     "range": {"sheetId": sheet_id, "dimension": "COLUMNS",
-              "startIndex": 10, "endIndex": 11},
+              "startIndex": 11, "endIndex": 12},
     "properties": {"pixelSize": 210},
     "fields": "pixelSize",
 }})
