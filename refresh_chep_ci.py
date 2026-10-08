@@ -353,3 +353,28 @@ sheets.spreadsheets().batchUpdate(
 
 print(f"Done — {len(rows)} papers, table '{TABLE_NAME}' rebuilt.")
 print(f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/edit")
+
+# --- Append tally row ---
+print("Appending tally row...")
+tally_result = sheets.spreadsheets().values().batchGet(
+    spreadsheetId=SHEET_ID,
+    ranges=["stats!G9:G17", "stats!I9:I17"],
+    majorDimension="COLUMNS",
+).execute()
+
+def _flat(range_data):
+    cols = range_data.get("values", [[]])
+    return cols[0] if cols else [""] * 9
+
+g_vals = _flat(tally_result["valueRanges"][0])
+i_vals = _flat(tally_result["valueRanges"][1])
+
+tally_row = [run_ts] + g_vals + i_vals
+sheets.spreadsheets().values().append(
+    spreadsheetId=SHEET_ID,
+    range="tally!A:A",
+    valueInputOption="USER_ENTERED",
+    insertDataOption="INSERT_ROWS",
+    body={"values": [tally_row]},
+).execute()
+print("Tally row appended.")
